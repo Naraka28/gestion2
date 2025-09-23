@@ -1,0 +1,7 @@
+name: test
+
+jobs:
+  runBash:
+    runs-on: vm-team04
+    steps:
+      - run: 
