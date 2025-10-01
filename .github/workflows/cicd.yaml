@@ -7,7 +7,7 @@ on:
 
 jobs:
   hola-mundo:
-    runs-on: self-hosted
+    runs-on: vm-team04
     steps:
       - name: Descarga Repositorio
         uses: actions/checkout@v3
