@@ -1,7 +1,17 @@
 name: test
 
+on:
+  push:
+    branches:
+      - main
+
 jobs:
-  runBash:
+  hola-mundo:
     runs-on: vm-team04
     steps:
-      - run: 
+      - name: Descarga Repositorio
+        uses: actions/checkout@v3
+
+      - name: Ejecuta script
+        run: |
+          echo "Hola mundo"
