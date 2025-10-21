@@ -22,6 +22,10 @@ jobs:
             -Dsonar.projectKey=gestion \
             -Dsonar.sources=. \
             -Dsonar.host.url=${{secrets.SONAR_HOST_URL}}
+      - name: Dockerizar aplicación
+        run: docker build -t weather:1.0 .
+      - name: Correr contenedor
+        run: docker run -p 80:5000 weather:1.0
       # If you wish to fail your job when the Quality Gate is red, uncomment the
       # following lines. This would typically be used to fail a deployment.
       # - uses: SonarSource/sonarqube-quality-gate-action@v1
