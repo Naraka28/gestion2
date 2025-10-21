@@ -28,7 +28,7 @@ jobs:
       - name: Correr contenedor
         run: docker run -d -p 80:80 weather:1.0
       # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
+      # following lines. This would typically be used to fail a deployment
       # - uses: SonarSource/sonarqube-quality-gate-action@v1
       #   timeout-minutes: 5
       #   env:
