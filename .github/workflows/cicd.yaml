@@ -1,23 +1,31 @@
+
 name: Build
 
 on:
   push:
     branches:
       - main
+
+
 jobs:
   build:
+    name: Build and analyze
     runs-on: vm-team04
+    
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Ejecutar SonarScanner
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Ejecutar sonarscanner
         run: |
-          SONAR_TOKEN=${{secrets.SONAR_TOKEN}} sonar-scanner \
+          export SONAR_TOKEN=${{secrets.SONAR_TOKEN}}
+          sonar-scanner \
             -Dsonar.projectKey=gestion \
             -Dsonar.sources=. \
             -Dsonar.host.url=${{secrets.SONAR_HOST_URL}}
-      - name: Dockerizar aplicación
-        run: docker build -t weather:1.0 .
-      - name: Correr contenedor
-        run: docker run -d -p 80:80 weather:1.0
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      # - uses: SonarSource/sonarqube-quality-gate-action@v1
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
