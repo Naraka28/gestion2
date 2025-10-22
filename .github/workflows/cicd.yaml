@@ -1,34 +1,56 @@
-
-name: Build
+name: Análisis SonarQube + Deploy
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [ main ]
+  workflow_dispatch: {}
 
 jobs:
-  build:
-    name: Build and analyze
+  sonar_and_deploy:
     runs-on: vm-team04
-    
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Ejecutar sonarscanner
+      - name: Descargar repositorio
+        uses: actions/checkout@v3
+
+      # --- SONARQUBE ---
+      - name: Ejecutar análisis SonarQube
+        env:
+          SONAR_SCANNER_OPTS: "-Xmx512m"
         run: |
           sonar-scanner \
-          -Dsonar.projectKey=dockerizar \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=http://40.71.208.241:8080
-      - name: Dockerizar aplicación
-        run: docker build -t weather:1.0 .
-      - name: Correr contenedor
-        run: docker run -d -p 80:80 weather:1.0
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment
-      # - uses: SonarSource/sonarqube-quality-gate-action@v1
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            -Dsonar.projectKey=weather \
+            -Dsonar.sources=. \
+            --Dsonar.host.url=http://40.71.208.241:8080 \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+      # --- DOCKER CHECK ---
+      - name: Verificar Docker
+        run: |
+          docker --version
+          systemctl is-active --quiet docker || (echo "Docker no está activo" && exit 1)
+
+      # --- BUILD ---
+      - name: Construir imagen Docker
+        run: docker build --pull -t weather-app:latest .
+
+      # --- DEPLOY ---
+      - name: Desplegar contenedor
+        run: |
+          docker rm -f weather-app 2>/dev/null || true
+          docker run -d --name weather-app -p 80:80 weather-app:latest
+
+      # --- HEALTHCHECK (opcional) ---
+      - name: Verificar que la app respondió
+        run: |
+          for i in {1..20}; do
+            if curl -sf http://40.71.208.241:8080/ >/dev/null; then
+              echo "✅ App corriendo correctamente"
+              exit 0
+            fi
+            echo "Esperando app... ($i)"
+            sleep 2
+          done
+          echo "❌ La app no respondió en el puerto 8000"
+          docker logs --tail=50 weather-app || true
+          exit 1
