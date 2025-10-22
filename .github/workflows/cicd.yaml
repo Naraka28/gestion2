@@ -14,11 +14,19 @@ jobs:
         uses: actions/checkout@v3
 
       # --- SONARQUBE ---
+      - name: Instalar Sonar Scanner
+        run: |
+          export SONAR_SCANNER_VERSION=7.2.0.5079
+          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-x64
+          mkdir -p $HOME/.sonar
+          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
+          unzip sonar-scanner.zip -d $HOME/.sonar/
+          export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+          echo "PATH=$PATH" >> $GITHUB_ENV
       - name: Ejecutar análisis SonarQube
         env:
           SONAR_SCANNER_OPTS: "-Xmx512m"
         run: |
-          echo "/usr/local/bin" >> $GITHUB_PATH
           sonar-scanner \
             -Dsonar.projectKey=weather \
             -Dsonar.sources=. \
