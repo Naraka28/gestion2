@@ -1,13 +1,7 @@
 FROM python
-
-RUN apt-get update && apt-get install build-essential python3-dev libffi-dev libzmq3-dev -y
-
-WORKDIR /usr/src/app
-EXPOSE 80
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
 COPY . .
-
+RUN apt-get update
+RUN apt-get install build-essential python3-dev libffi-dev libzmq3-dev -y
+RUN pip install -r requirements.txt
+EXPOSE 80
 CMD ["python", "main.py"]
