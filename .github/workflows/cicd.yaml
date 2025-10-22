@@ -18,10 +18,11 @@ jobs:
         env:
           SONAR_SCANNER_OPTS: "-Xmx512m"
         run: |
+          echo "/usr/local/bin" >> $GITHUB_PATH
           sonar-scanner \
             -Dsonar.projectKey=weather \
             -Dsonar.sources=. \
-            --Dsonar.host.url=http://40.71.208.241:8080 \
+            -Dsonar.host.url=http://40.71.208.241:8080 \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
       # --- DOCKER CHECK ---
