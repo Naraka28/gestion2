@@ -61,3 +61,7 @@ gunicorn==23.0.0
 # Networking / env
 requests==2.32.3
 python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.2
+pytest-mock==3.14.0
