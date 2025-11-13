@@ -1,13 +1,14 @@
-name: Análisis SonarQube + Deploy
+name: CI - Análisis, Seguridad y Deploy
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: {}
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  sonar_and_deploy:
-    runs-on: vm-team04
+  build_and_analyze:
+    runs-on: gestion
 
     steps:
       - name: Descargar repositorio
@@ -22,47 +23,81 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 mypy pytest
+
+      # --- ANÁLISIS ESTÁTICO ---
+      - name: Ejecutar flake8 (convenciones)
+        run: |
+          echo "Ejecutando flake8..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Ejecutar mypy (tipado estático)
+        run: |
+          echo "Ejecutando mypy..."
+          mypy . --ignore-missing-imports
+
+      # --- PRUEBAS UNITARIAS ---
       - name: Ejecutar pruebas unitarias
-        run: pytest
+        run: pytest --maxfail=1 --disable-warnings -q
 
       # --- SONARQUBE ---
       - name: Instalar Sonar Scanner
         run: |
           export SONAR_SCANNER_VERSION=7.2.0.5079
           export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-x64
-          mkdir -p $HOME/.sonar
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
-          unzip -o sonar-scanner.zip -d $HOME/.sonar/
+          curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
           export PATH=$SONAR_SCANNER_HOME/bin:$PATH
           echo "PATH=$PATH" >> $GITHUB_ENV
+
       - name: Ejecutar análisis SonarQube
         env:
           SONAR_SCANNER_OPTS: "-Xmx512m"
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=weather \
+            -Dsonar.projectKey=gestion \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://40.71.208.241:8080 \
+            -Dsonar.host.url=http://10.10.153.232:9000
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-      # --- DOCKER CHECK ---
+      # --- ANÁLISIS DE SEGURIDAD (CodeQL) ---
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Ejecutar análisis CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "security-analysis"
+
+      # --- CREAR ARTEFACTO ZIP ---
+      - name: Crear artefacto (.zip)
+        run: |
+          mkdir -p artifacts
+          zip -r artifacts/weather_app.zip . -x "*.git*" "__pycache__/*" "*.pytest_cache*" "artifacts/*"
+      - name: Subir artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: weather_app_artifact
+          path: artifacts/weather_app.zip
+
+      # --- DOCKER ---
       - name: Verificar Docker
         run: |
           docker --version
           systemctl is-active --quiet docker || (echo "Docker no está activo" && exit 1)
 
-      # --- BUILD ---
       - name: Construir imagen Docker
         run: docker build --pull -t weather-app:latest .
 
-      # --- DEPLOY ---
       - name: Desplegar contenedor
         run: |
           docker rm -f weather-app 2>/dev/null || true
           docker run -d --name weather-app -p 80:80 weather-app:latest
 
-      # --- HEALTHCHECK (opcional) ---
-      - name: Verificar que la app respondió
+      - name: Healthcheck de la app
         run: |
           for i in {1..20}; do
             if curl -sf http://40.71.208.241:8080/ >/dev/null; then
