@@ -59,7 +59,7 @@ jobs:
           sonar-scanner \
             -Dsonar.projectKey=gestion_2 \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000
+            -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
       # --- ANÁLISIS DE SEGURIDAD (CodeQL) ---
