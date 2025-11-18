@@ -82,11 +82,11 @@ jobs:
         run: |
           mkdir -p artifacts
           zip -r artifacts/weather_app.zip . -x "*.git*" "__pycache__/*" "*.pytest_cache*" "artifacts/*"
-      - name: Subir artefacto
-        uses: actions/upload-artifact@v4
-        with:
-          name: weather_app_artifact
-          path: artifacts/weather_app.zip
+      - name: Subir artefacto a JFrog Artifactory
+        run: |
+          curl -H "X-JFrog-Art-Api:${{ secrets.JFROG_TOKEN }}" \
+            -T artifacts/weather_app.zip \
+            "${{ secrets.JFROG_URL }}/weather_app/${{ github.run_number }}/weather_app.zip"
 
       # --- DOCKER ---
       - name: Verificar Docker
