@@ -58,7 +58,7 @@ jobs:
           sonar-scanner \
             -Dsonar.projectKey=gestion \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://10.10.153.232:9000
+            -Dsonar.host.url=http://localhost:9000
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
       # --- ANÁLISIS DE SEGURIDAD (CodeQL) ---
@@ -100,7 +100,7 @@ jobs:
       - name: Healthcheck de la app
         run: |
           for i in {1..20}; do
-            if curl -sf http://40.71.208.241:8080/ >/dev/null; then
+            if curl -sf http://localhost:8080/ >/dev/null; then
               echo "✅ App corriendo correctamente"
               exit 0
             fi
