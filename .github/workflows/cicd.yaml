@@ -35,6 +35,7 @@ jobs:
       - name: Ejecutar mypy (tipado estático)
         run: |
           echo "Ejecutando mypy..."
+          mypy --install-types
           mypy . --ignore-missing-imports
 
       # --- PRUEBAS UNITARIAS ---
