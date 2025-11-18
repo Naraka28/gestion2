@@ -24,6 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install flake8 mypy pytest
+          python3 -m pip install types-requests
 
       # --- ANÁLISIS ESTÁTICO ---
       - name: Ejecutar flake8 (convenciones)
@@ -35,7 +36,6 @@ jobs:
       - name: Ejecutar mypy (tipado estático)
         run: |
           echo "Ejecutando mypy..."
-          mypy --install-types
           mypy . --ignore-missing-imports
 
       # --- PRUEBAS UNITARIAS ---
