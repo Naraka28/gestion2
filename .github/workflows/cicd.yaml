@@ -57,7 +57,7 @@ jobs:
           SONAR_SCANNER_OPTS: "-Xmx512m"
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=gestion \
+            -Dsonar.projectKey=gestion_2 \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
