@@ -77,7 +77,6 @@ jobs:
         with:
           category: "security-analysis"
 
-      # --- CREAR ARTEFACTO ZIP ---
       - name: Crear artefacto (.zip)
         run: |
           mkdir -p artifacts
