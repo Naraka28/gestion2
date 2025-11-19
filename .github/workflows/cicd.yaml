@@ -95,7 +95,7 @@ jobs:
           systemctl is-active --quiet docker || (echo "Docker no está activo" && exit 1)
 
       - name: Construir imagen Docker
-        run: docker build --pull -t weather-app:latest .
+        run: docker build -t weather-app:latest .
 
       - name: Desplegar contenedor
         run: |
