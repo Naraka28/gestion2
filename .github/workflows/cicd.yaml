@@ -88,11 +88,6 @@ jobs:
             "${{ secrets.JFROG_URL }}/weather_app/${{ github.run_number }}/weather_app.zip"
 
       # --- DOCKER ---
-      - name: Verificar Docker
-        run: |
-          docker --version
-          systemctl is-active --quiet docker || (echo "Docker no está activo" && exit 1)
-
       - name: Construir imagen Docker
         run: docker build -t weather-app:latest .
 
