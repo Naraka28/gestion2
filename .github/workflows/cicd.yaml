@@ -105,13 +105,13 @@ jobs:
       - name: Healthcheck de la app
         run: |
           for i in {1..20}; do
-            if curl -sf http://localhost:8080/ >/dev/null; then
+            if curl -sf http://localhost:80/ >/dev/null; then
               echo "✅ App corriendo correctamente"
               exit 0
             fi
             echo "Esperando app... ($i)"
             sleep 2
           done
-          echo "❌ La app no respondió en el puerto 8000"
+          echo "❌ La app no respondió en el puerto 80"
           docker logs --tail=50 weather-app || true
           exit 1

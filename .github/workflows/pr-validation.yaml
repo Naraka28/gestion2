@@ -1,0 +1,41 @@
+name: PR Validation - Tests & Static Analysis
+
+on:
+  pull_request:
+    branches: [main] # Activación SOLO cuando el PR apunta a main
+
+permissions:
+  contents: read
+
+jobs:
+  validate_pr:
+    runs-on: gestion
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 mypy pytest
+          python3 -m pip install types-requests
+
+      # --- ANÁLISIS ESTÁTICO ---
+      - name: Ejecutar flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Ejecutar mypy
+        run: mypy . --ignore-missing-imports
+
+      # --- PRUEBAS UNITARIAS ---
+      - name: Ejecutar pruebas unitarias
+        run: pytest --maxfail=1 --disable-warnings -q
