@@ -27,7 +27,7 @@ jobs:
           pip install flake8 mypy pytest
           python3 -m pip install types-requests
 
-      # --- ANÁLISIS ESTÁTICO ---
+      # -- ANÁLISIS ESTÁTICO --
       - name: Ejecutar flake8
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
