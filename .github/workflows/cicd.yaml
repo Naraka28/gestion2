@@ -30,7 +30,7 @@ jobs:
           pip install flake8 mypy pytest
           python3 -m pip install types-requests
 
-      # --- ANÁLISIS ESTÁTICO ---
+      # -- ANÁLISIS ESTÁTICO --
       - name: Ejecutar flake8 (convenciones)
         run: |
           echo "Ejecutando flake8..."
