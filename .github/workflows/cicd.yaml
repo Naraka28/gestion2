@@ -41,7 +41,7 @@ jobs:
           echo "Ejecutando mypy..."
           mypy . --ignore-missing-imports
 
-      # --- PRUEBAS UNITARIAS ---
+      # -- PRUEBAS UNITARIAS --
       - name: Ejecutar pruebas unitarias
         run: pytest --maxfail=1 --disable-warnings -q
 
